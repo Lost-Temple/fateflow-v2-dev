@@ -22,7 +22,7 @@ from fate_flow.manager.service.provider_manager import ProviderManager
 from fate_flow.utils.api_utils import API
 
 
-@manager.route('/register', methods=['POST'])
+@manager.route('/register', methods=['POST'])  # /v2/provider/register
 @API.Input.json(name=fields.String(required=True), desc=PROVIDER_NAME)
 @API.Input.json(device=fields.String(required=True), desc=DEVICE)
 @API.Input.json(version=fields.String(required=True), desc=VERSION)

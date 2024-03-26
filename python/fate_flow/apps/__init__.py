@@ -151,4 +151,4 @@ def _init_permission_group(urls: dict):
     PermissionController.add_role_for_user(PARTY_ID, "site", init=True)
 
 
-init_apps()
+init_apps()  # 这一步把所有的Http api 的route创建出来

@@ -6,7 +6,7 @@ base_url = "http://127.0.0.1:9380"
 
 
 def register_components():
-    uri = "/v2/provider/register"
+    uri = "/v2/provider/register"  # fate_flow/python/fate_flow/apps/client/provider_app.py 中的服务
     config_path = "../job/unionpay/unionpay_components.json"
     body = json.load(open(config_path, "r"))
     resp = requests.post(base_url+uri, json=body)

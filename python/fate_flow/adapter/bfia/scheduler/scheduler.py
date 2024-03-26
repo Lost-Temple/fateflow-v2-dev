@@ -17,7 +17,7 @@ class BfiaScheduler(SchedulerABC):
     def run_do(self):
         logger = schedule_logger(name="bfia_scheduler")
         logger.info("start schedule bfia job")
-        jobs = BfiaScheduleJobSaver.query_job(
+        jobs = BfiaScheduleJobSaver.query_job(  # 查询 READY 状态的JOB
             status=JobStatus.READY,
             order_by=["priority", "create_time"],
             reverse=[True, False]
@@ -27,7 +27,7 @@ class BfiaScheduler(SchedulerABC):
             job = jobs[0]
             logger.info(f"schedule ready job {job.f_job_id}")
             try:
-                self.schedule_ready_jobs(job)
+                self.schedule_ready_jobs(job)  # 这个会启动这个会发送start job 的请求，并把job状态改为RUNNING
             except Exception as e:
                 schedule_logger(job.f_job_id).exception(e)
             schedule_logger().info("schedule ready jobs finished")
@@ -36,7 +36,7 @@ class BfiaScheduler(SchedulerABC):
         schedule_logger().info("start schedule running jobs")
         jobs = BfiaScheduleJobSaver.query_job(status=JobStatus.RUNNING, order_by="create_time", reverse=False)
         schedule_logger().info(f"have {len(jobs)} running jobs")
-        for job in jobs:
+        for job in jobs:  # 状态为RUNNING的job
             schedule_logger().info(f"schedule running job {job.f_job_id}")
             try:
                 self.schedule_running_job(job=job)
@@ -380,7 +380,7 @@ class BfiaTaskScheduler(object):
                         break
                 else:
                     scheduling_status_code = SchedulingStatusCode.HAVE_NEXT
-                    status_code = cls.start_task(
+                    status_code = cls.start_task(  # 执行组件
                         job_id=waiting_task.f_job_id,
                         task_name=waiting_task.f_task_name,
                         task_id=waiting_task.f_task_id,
