@@ -135,8 +135,8 @@ class Upload:
         self.parameters = parameters
         logging.info(self.parameters.to_dict())
         storage_address = self.parameters.storage_address
-        if not os.path.isabs(parameters.file):
-            parameters.file = os.path.join(
+        if not os.path.isabs(parameters.file):  # 判断为 相对路径
+            parameters.file = os.path.join( # 如果是相对路径，那么前面添上fate_flow的目录
                 get_fate_flow_directory(), parameters.file
             )
         name, namespace = parameters.name, parameters.namespace

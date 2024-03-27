@@ -30,7 +30,7 @@ from fate_flow.errors.server_error import NoFoundTable, NoFoundFile
 page_name = "data"
 
 
-@manager.route('/component/upload', methods=['POST'])
+@manager.route('/component/upload', methods=['POST'])  # 上传数据集：在配置文件中指定数据文件路径，路径为服务器本地路径
 @API.Input.json(file=fields.String(required=True), desc=SERVER_FILE_PATH)
 @API.Input.json(head=fields.Bool(required=True), desc=HEAD)
 @API.Input.json(partitions=fields.Integer(required=True), desc=PARTITIONS)
@@ -54,7 +54,7 @@ def upload_data(file, head, partitions, meta, namespace=None, name=None, extend_
     return API.Output.json(**result)
 
 
-@manager.route('/component/upload/file', methods=['POST'])
+@manager.route('/component/upload/file', methods=['POST'])  # 上传数据：form-data方式上传数据文件
 @API.Input.form(head=fields.Bool(required=True), desc=HEAD)
 @API.Input.form(partitions=fields.Integer(required=True), desc=PARTITIONS)
 @API.Input.form(meta=fields.String(required=True), desc=META)
@@ -85,7 +85,7 @@ def download_data(namespace, name, path):
     return API.Output.json(**result)
 
 
-@manager.route('/component/dataframe/transformer', methods=['POST'])
+@manager.route('/component/dataframe/transformer', methods=['POST'])  # data transformer
 @API.Input.json(data_warehouse=fields.Dict(required=True), desc=DATA_WAREHOUSE)
 @API.Input.json(namespace=fields.String(required=True), desc=NAMESPACE)
 @API.Input.json(name=fields.String(required=True), desc=NAME)
