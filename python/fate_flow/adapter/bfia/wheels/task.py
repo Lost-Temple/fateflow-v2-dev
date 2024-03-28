@@ -79,7 +79,7 @@ class BfiaTaskController(TaskController):
         # start
         for task in tasks:
             schedule_logger(job_id).info(f"start {task.f_role} {task.f_party_id} task")
-            status_list.append(cls.start_task(task))
+            status_list.append(cls.start_task(task))  # 执行task
         schedule_logger(job_id).info(f"start task status: {status_list}")
         if False in status_list:
             return False

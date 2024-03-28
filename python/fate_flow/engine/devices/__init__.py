@@ -30,11 +30,11 @@ def build_engine(provider_name: str, launcher_name: str = LauncherType.DEFAULT):
     else:
         if provider.device in {ProviderDevice.DOCKER, ProviderDevice.K8S}:
             from fate_flow.engine.devices.container import ContainerdEngine
-            engine_session = ContainerdEngine(provider)
+            engine_session = ContainerdEngine(provider)  # 使用K8S或者DOCKER
 
         elif provider.device in {ProviderDevice.LOCAL}:
             from fate_flow.engine.devices.local import LocalEngine
-            engine_session = LocalEngine(provider)
+            engine_session = LocalEngine(provider)  # 使用LOCAL，其实就是本地的python执行环境
 
         else:
             raise ValueError(f'engine device "{provider.device}" is not supported')

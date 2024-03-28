@@ -89,7 +89,7 @@ class BfiaScheduler(SchedulerABC):
             "data": {}
         }
         try:
-            job = ScheduleJob()
+            job = ScheduleJob()  # 对应数据库表 t_schedule_job
             job.f_job_id = job_id
             job.f_parties = BfiaJobController.get_job_parties(dag_schema)
             job.f_initiator_party_id = dag_schema.dag.config.initiator.node_id
@@ -111,7 +111,7 @@ class BfiaScheduler(SchedulerABC):
                     raise RuntimeError(response)
 
             job.f_status = StatusSet.READY
-            cls.create_schedule_tasks(job, dag_schema)
+            cls.create_schedule_tasks(job, dag_schema)  # 创建 task
             schedule_logger(job_id).info(f"[scheduler]submit job successfully, job id is {job.f_job_id}")
             result = {
                 "code": ReturnCode.SUCCESS,
@@ -261,7 +261,7 @@ class BfiaScheduler(SchedulerABC):
         if task_name:
             task_list = [task_name]
         for _task_name in task_list:
-            task = ScheduleTaskStatus()
+            task = ScheduleTaskStatus()  # 对应数据库表 t_schedule_task_status
             task.f_job_id = job_id
             task.f_task_name = _task_name
             task.f_task_id = task_ids.get(_task_name)
