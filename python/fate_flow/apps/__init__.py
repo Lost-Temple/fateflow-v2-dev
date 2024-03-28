@@ -118,7 +118,7 @@ def init_apps():
         "partner": site_authentication_before_request,
         "scheduler": site_authentication_before_request
     }
-    for key in app_list:
+    for key in app_list:  # ['client', 'partner', 'scheduler', 'worker']
         urls_dict[key] = [register_page(path, before_request_func.get(key)) for path in search_pages_path(Path(__file__).parent / key)]
     # adapter extend apps
     try:
