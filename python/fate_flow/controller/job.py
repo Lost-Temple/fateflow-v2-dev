@@ -220,8 +220,13 @@ class JobController(object):
         lst_job = []
         for job in jobs:
             job['partners'] = set()
-            for _r in job['parties']:
-                job['partners'].update(_r.get("party_id"))
+            for _r in job['parties']:  # job['parties']返回的数据有可能为：[{"role": "local", "party_id": ["0"]}]，也有可能为["JG0100001100000000"]
+                if isinstance(_r, dict):
+                    job['partners'].update(_r.get("party_id"))  # 原代码中没有经过类型判断，这里是有bug的
+                elif isinstance(_r, str):
+                    job['partners'].update(_r)
+                else:
+                    continue
             job['partners'].discard(job['party_id'])
             job['partners'] = sorted(job['partners'])
             if partner and str(partner) not in job['partners']:
@@ -267,7 +272,8 @@ class JobController(object):
         jobs = JobSaver.query_job(status=JobStatus.WAITING)
         clean_status = {}
         for job in jobs:
-            status = FederatedScheduler.request_stop_job(party_id=job.f_scheduler_party_id,job_id=job.f_job_id, stop_status=JobStatus.CANCELED)
+            status = FederatedScheduler.request_stop_job(party_id=job.f_scheduler_party_id, job_id=job.f_job_id,
+                                                         stop_status=JobStatus.CANCELED)
             clean_status[job.f_job_id] = status
         return clean_status
 
@@ -278,7 +284,7 @@ class JobController(object):
         if not jobs:
             raise NoFoundJob(job_id=job_id)
         FederatedScheduler.request_stop_job(
-            party_id=jobs[0].f_scheduler_party_id,job_id=jobs[0].f_job_id, stop_status=JobStatus.CANCELED
+            party_id=jobs[0].f_scheduler_party_id, job_id=jobs[0].f_job_id, stop_status=JobStatus.CANCELED
         )
         for task in tasks:
             # metric
@@ -484,6 +490,7 @@ class JobInheritance:
                     "party_id": target_task.f_party_id
                 })
                 OutputDataTracking.create(_t)
+
         schedule_logger(job_id).info("start load output tracking")
         cls.load_do(source_task_list, target_task_list, callback)
         schedule_logger(job_id).info("load output tracking success")
@@ -509,6 +516,7 @@ class JobInheritance:
                     "model_version": model_version
                 })
                 ModelMeta.save(**_md)
+
         schedule_logger(job_id).info("start load model meta")
         cls.load_do(source_task_list, target_task_list, callback)
         schedule_logger(job_id).info("load model meta success")
@@ -531,6 +539,7 @@ class JobInheritance:
                 task_id=target_task.f_task_id,
                 task_version=target_task.f_task_version
             )
+
         schedule_logger(job_id).info("start load metric")
         cls.load_do(source_task_list, target_task_list, callback)
         schedule_logger(job_id).info("load metric success")
@@ -556,6 +565,7 @@ class JobInheritance:
             schedule_logger(task_info["job_id"]).info("update info: {}".format(update_info))
             JobSaver.update_task(task_info)
             TaskController.update_task_status(task_info)
+
         schedule_logger(job_id).info("start load status")
         cls.load_do(source_task_list, target_task_list, callback)
         schedule_logger(job_id).info("load status success")
