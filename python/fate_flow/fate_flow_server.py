@@ -89,7 +89,7 @@ def server_init():
 
     # detector
     Detector(interval=5 * 1000, logger=detect_logger).start()
-    FederatedDetector(interval=10 * 1000, logger=detect_logger).start()
+    FederatedDetector(interval=10 * 1000, logger=detect_logger).start()  # 目前好像没啥用，代码写了个pass
     DAGScheduler(interval=2 * 1000, logger=schedule_logger()).start()
 
     # provider register

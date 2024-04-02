@@ -17,13 +17,14 @@ from fate_flow.entity.types import ProcessRole
 
 from fate_flow.runtime.reload_config_base import ReloadConfigBase
 from fate_flow.utils.version import get_versions
+from ofx.api.client import FlowSchedulerApi
 
 
 class RuntimeConfig(ReloadConfigBase):
     HTTP_PORT = None
     JOB_SERVER_HOST = None
     PROCESS_ROLE = None
-    SCHEDULE_CLIENT = None
+    SCHEDULE_CLIENT: FlowSchedulerApi = None  # FlowSchedulerApi
     CLIENT_ROLE = list()
     SERVICE_DB = None
     SESSION_LIST = []

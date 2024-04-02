@@ -473,7 +473,7 @@ class TaskScheduler(object):
                         break
                 else:
                     scheduling_status_code = SchedulingStatusCode.HAVE_NEXT
-                    status_code = cls.start_task(job=job, task=waiting_task)
+                    status_code = cls.start_task(job=job, task=waiting_task)  # 启动task
                     if status_code == SchedulingStatusCode.NO_RESOURCE:
                         schedule_logger(job.f_job_id).info(
                             f"task {waiting_task.f_task_id} can not apply resource, wait for the next round of scheduling")
@@ -504,7 +504,7 @@ class TaskScheduler(object):
         schedule_logger(task.f_job_id).info("start task {} {}".format(task.f_task_id, task.f_task_version))
         FederatedScheduler.sync_task_status(task_id=task.f_task_id, command_body={"status": task.f_status})
         ScheduleJobSaver.update_task_status(task.to_human_model_dict(), scheduler_status=True)
-        status_code, response = FederatedScheduler.start_task(task_id=task.f_task_id)
+        status_code, response = FederatedScheduler.start_task(task_id=task.f_task_id)  # 启动task
         if status_code == FederatedSchedulingStatusCode.SUCCESS:
             return SchedulingStatusCode.SUCCESS
         else:
