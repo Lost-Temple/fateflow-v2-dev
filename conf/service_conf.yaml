@@ -17,15 +17,15 @@ fateflow:
 #    http_port:
 #    grpc_port:
 database:
-  engine: sqlite
+  engine: mysql
   # encrypt passwd key
   decrypt_key:
   mysql:
     name: fate_flow
     user: fate
-    passwd: fate
-    host: 127.0.0.1
-    port: 3306
+    passwd: fate_dev
+    host: 192.168.10.91
+    port: 23306
     max_connections: 100
     stale_timeout: 30
   sqlite:
@@ -89,9 +89,9 @@ hook_module:
   site_authentication: fate_flow.hook.flow.site_authentication
   permission: fate_flow.hook.flow.permission
 authentication:
-  client: false
-  site: false
-  permission: false
+  client: true
+  site: true
+  permission: true
 model_store:
   engine: file
   # encrypt passwd key

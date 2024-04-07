@@ -144,7 +144,7 @@ class PermissionController(object):
 class ResourcePermissionController:
     def __init__(self, party_id):
         self.party_id = party_id
-        self.casbin_controller = PC
+        self.casbin_controller = PC  # 这里PC就是PERMISSION_CASBIN
         if not self.casbin_controller:
             raise PermissionOperateError(message="No permission controller is found")
 

@@ -16,12 +16,12 @@ class HookManager:
     PERMISSION_CHECK = []
 
     @staticmethod
-    def init():
+    def init():  # 配置文件中配了HOOK，且 client || site || permission 为真时
         if HOOK_MODULE is not None and (CLIENT_AUTHENTICATION or SITE_AUTHENTICATION or PERMISSION_SWITCH):
             for modules in HOOK_MODULE.values():
                 for module in modules.split(";"):
                     try:
-                        importlib.import_module(module)
+                        importlib.import_module(module)  # 导入相应的模块
                     except Exception as e:
                         stat_logger.exception(e)
 
