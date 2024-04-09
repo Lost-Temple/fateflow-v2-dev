@@ -12,8 +12,8 @@ def authentication(parm: AuthenticationParameters) -> AuthenticationReturn:
     timestamp = parm.headers.get("Timestamp")
     nonce = parm.headers.get("Nonce")
     signature = parm.headers.get("Signature")
-    check_parameters(app_id, user_name, timestamp, nonce, signature)
-    if Authentication.md5_verify(app_id, timestamp, nonce, signature, user_name):
+    check_parameters(app_id, user_name, timestamp, nonce, signature)  # 检查是否包含必要的参数
+    if Authentication.md5_verify(app_id, timestamp, nonce, signature, user_name):  # 验签
         if PermissionController.enforcer(app_id, parm.path, parm.method):
             return AuthenticationReturn(code=ReturnCode.Base.SUCCESS, message="success")
         else:

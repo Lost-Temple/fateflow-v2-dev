@@ -28,7 +28,7 @@ class BfiaJobController(object):
         }
         schedule_logger(job_id).info("start request create job")
         resp = BfiaFederatedScheduler.request_create_job(
-            party_id=PARTY_ID,
+            party_id=PARTY_ID,  # 本站点的PARTY_ID
             command_body=job_info
         )
         schedule_logger(job_id).info(f"response: {resp}")

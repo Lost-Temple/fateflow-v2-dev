@@ -89,9 +89,9 @@ hook_module:
   site_authentication: fate_flow.hook.flow.site_authentication
   permission: fate_flow.hook.flow.permission
 authentication:
-  client: true
-  site: true
-  permission: true
+  client: false
+  site: false
+  permission: false
 model_store:
   engine: file
   # encrypt passwd key

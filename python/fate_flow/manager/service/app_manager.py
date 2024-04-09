@@ -28,7 +28,7 @@ class AppManager(BaseModelOperate):
     @classmethod
     def init(cls):
         if CLIENT_AUTHENTICATION or SITE_AUTHENTICATION:
-            if cls.query_app(app_name="admin", init=True):
+            if cls.query_app(app_name="admin", init=True):  # 每次启动时,都要删除掉admin
                 cls._delete(AppInfo, app_name="admin")
             cls.create_app(app_name="admin", app_id="admin", app_token=ADMIN_KEY, app_type="admin", init=True)
             app_info = cls.create_app(app_name=PARTY_ID, app_id=PARTY_ID, app_type=AppType.SITE, init=True)

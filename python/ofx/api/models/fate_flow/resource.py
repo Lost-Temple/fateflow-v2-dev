@@ -198,7 +198,7 @@ class BaseAPI:
                           initiator_party_id=""):
         try:
             headers = {}
-            if self.callback:
+            if self.callback:  # 这里回调
                 result = self.callback(dest_party_id, body, initiator_party_id=initiator_party_id)
                 if result.code == 0:
                     headers = result.signature if result.signature else {}

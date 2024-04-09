@@ -34,6 +34,6 @@ SQLITE_FILE_NAME = "fate_flow_sqlite.db"
 
 
 # Client Manager
-APP_TOKEN_LENGTH = 16
-ADMIN_ID = "admin"
-ADMIN_KEY = "fate_flow_admin"
+APP_TOKEN_LENGTH = 16  # 定义app_token的最长长度,对应 t_app_info 中的 f_app_token
+ADMIN_ID = "admin"  # 对应t_app_info中的f_app_id
+ADMIN_KEY = "fate_flow_admin"  # 对应t_app_info中的f_app_token
