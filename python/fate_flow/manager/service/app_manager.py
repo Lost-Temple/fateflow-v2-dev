@@ -29,17 +29,17 @@ class AppManager(BaseModelOperate):
     def init(cls):
         if CLIENT_AUTHENTICATION or SITE_AUTHENTICATION:
             if cls.query_app(app_name="admin", init=True):  # 每次启动时,都要删除掉admin
-                cls._delete(AppInfo, app_name="admin")
-            cls.create_app(app_name="admin", app_id="admin", app_token=ADMIN_KEY, app_type="admin", init=True)
-            app_info = cls.create_app(app_name=PARTY_ID, app_id=PARTY_ID, app_type=AppType.SITE, init=True)
-            if app_info:
+                cls._delete(AppInfo, app_name="admin")  # 删除admin
+            cls.create_app(app_name="admin", app_id="admin", app_token=ADMIN_KEY, app_type="admin", init=True)  # 重建
+            app_info = cls.create_app(app_name=PARTY_ID, app_id=PARTY_ID, app_type=AppType.SITE, init=True)  # site 类型
+            if app_info:  # 如果在 t_app_info 中添加了数据，那么也要添加一条数据到 t_partner_app_info中去
                 cls.create_partner_app(party_id=PARTY_ID, app_id=app_info.get("app_id"),
                                        app_token=app_info.get("app_token"))
 
     @classmethod
-    @switch_function(CLIENT_AUTHENTICATION or SITE_AUTHENTICATION)
-    @check_permission(operate="create", types="client")
-    def create_app(cls, app_type, app_name, app_id=None, app_token=None, init=True):
+    @switch_function(CLIENT_AUTHENTICATION or SITE_AUTHENTICATION)  # 检查 鉴权开关有没开启
+    @check_permission(operate="create", types="client")  # 检查app 类型为 client的create 权限
+    def create_app(cls, app_type, app_name, app_id=None, app_token=None, init=True):  # 这init在check_permission中会用到
         if not app_id:
             app_id = cls.generate_app_id()
         if not app_token:

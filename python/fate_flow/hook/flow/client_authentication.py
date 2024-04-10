@@ -6,7 +6,7 @@ from fate_flow.hook.common.parameters import AuthenticationReturn, Authenticatio
 
 
 @HookManager.register_client_authentication_hook
-def authentication(parm: AuthenticationParameters) -> AuthenticationReturn:
+def authentication(parm: AuthenticationParameters) -> AuthenticationReturn:  # client 鉴权的钩子
     app_id = parm.headers.get("appId")
     user_name = parm.headers.get("userName")
     timestamp = parm.headers.get("Timestamp")

@@ -89,7 +89,7 @@ def register_page(page_path, func=None, prefix=API_VERSION):
     return page_name, [(os.path.join(url_prefix, rule_methods[0].lstrip("/")), rule_methods[1]) for rule_methods in rule_methods_list]
 
 
-def client_authentication_before_request():
+def client_authentication_before_request():  # client 请求的拦截器
     if CLIENT_AUTHENTICATION:
         result = HookManager.client_authentication(AuthenticationParameters(
             request.path, request.method, request.headers,
@@ -100,7 +100,7 @@ def client_authentication_before_request():
             return API.Output.json(result.code, result.message)
 
 
-def site_authentication_before_request():
+def site_authentication_before_request():  # site 请求的拦截器（partner/scheduler）
     if SITE_AUTHENTICATION:
         result = HookManager.site_authentication(AuthenticationParameters(
             request.path, request.method, request.headers,
@@ -126,8 +126,8 @@ def init_apps():
         urls_dict.update(load_adapter_apps(register_page, search_pages_path))
     except:
         pass
-    if CLIENT_AUTHENTICATION or SITE_AUTHENTICATION:
-        _init_permission_group(urls=urls_dict)
+    if CLIENT_AUTHENTICATION or SITE_AUTHENTICATION:  # 如果开启了鉴权
+        _init_permission_group(urls=urls_dict)  # 初始化权限
 
 
 def _init_permission_group(urls: dict):

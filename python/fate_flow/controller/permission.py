@@ -41,14 +41,14 @@ class Authentication(object):
         return sign
 
     @classmethod
-    def md5_verify(cls, app_id, timestamp, nonce, signature, user_name="", initiator_party_id=""):
-        if cls.check_if_expired(timestamp):
+    def md5_verify(cls, app_id, timestamp, nonce, signature, user_name="", initiator_party_id=""):  # md5验证
+        if cls.check_if_expired(timestamp):  # 60s过期
             raise RequestExpired()
-        apps = AppManager.query_app(app_id=app_id)
+        apps = AppManager.query_app(app_id=app_id)  # 根据app_id查找数据库中对应的app
         if apps:
             _signature = cls.md5_sign(
                 app_id=app_id,
-                app_token=apps[0].f_app_token,
+                app_token=apps[0].f_app_token,  # 数据库中存储的app_token
                 user_name=user_name,
                 initiator_party_id=initiator_party_id,
                 timestamp=timestamp,
@@ -67,7 +67,7 @@ class Authentication(object):
         return generate_random_id(length=4, only_number=True)
 
     @staticmethod
-    def check_if_expired(timestamp, timeout=60):
+    def check_if_expired(timestamp, timeout=60):  # 60s 过期
         expiration = int(timestamp) + timeout * 1000
         if expiration < int(time.time() * 1000):
             return True
