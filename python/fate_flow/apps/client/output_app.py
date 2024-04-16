@@ -46,8 +46,9 @@ def query_metric_key(job_id, role, party_id, task_name):
 @API.Input.params(role=fields.String(required=True), desc=ROLE)
 @API.Input.params(party_id=fields.String(required=True), desc=PARTY_ID)
 @API.Input.params(task_name=fields.String(required=True), desc=TASK_NAME)
-@API.Input.params(filters=fields.Dict(required=False), desc=FILTERS)
+@API.Input.params(filters=fields.String(required=False), desc=FILTERS)  # 原代码中这里类型要求是Dict, 这个能做到？Get 参数就没有Dict类型吧？
 def query_metric(job_id, role, party_id, task_name, filters=None):
+    filters = eval(filters)
     tasks = JobSaver.query_task(job_id=job_id, role=role, party_id=party_id, task_name=task_name, ignore_protocol=True)
     if not tasks:
         return API.Output.fate_flow_exception(
@@ -97,13 +98,13 @@ def query_model(job_id, role, party_id, task_name):
     if not tasks:
         return API.Output.fate_flow_exception(e=NoFoundTask(job_id=job_id, role=role, party_id=party_id,
                                                             task_name=task_name))
-    task = tasks[0]
+    task = tasks[0]  # 先查找到相关的task，即相关的算法组件
 
     kind = task.f_protocol
     if kind != PROTOCOL.FATE_FLOW:
         from fate_flow.adapter import AdapterJobController
         model_data = AdapterJobController(kind).query_output_model()
-    else:
+    else:  # 从t_model_meta表中可以找到这个模型的元数据
         model_data = PipelinedModel.read_model(task.f_job_id, task.f_role, task.f_party_id, task.f_task_name)
     return API.Output.json(data=model_data)
 
@@ -162,7 +163,7 @@ def output_data_download(job_id, role, party_id, task_name, output_key=None):
         task_id=task.f_task_id,
         task_version=task.f_task_version,
         output_key=output_key,
-        tar_file_name=f"{job_id}_{role}_{party_id}_{task_name}"
+        tar_file_name=f"{job_id}_{role}_{party_id}_{task_name}.tar.gz"  # fixed by maodaoming , 原先没有加这个后缀
 
     )
 

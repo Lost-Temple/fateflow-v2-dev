@@ -25,7 +25,7 @@ class RuntimeConfig(ReloadConfigBase):
     JOB_SERVER_HOST = None
     PROCESS_ROLE = None
     SCHEDULE_CLIENT: FlowSchedulerApi = None  # FlowSchedulerApi
-    CLIENT_ROLE = list()
+    CLIENT_ROLE = list()  # 如果开启鉴权，这里的client_role列表最后生成：['client', 'super_client', 'site', 'worker', 'super_worker', 'bfia', 'super_bfia']
     SERVICE_DB = None
     SESSION_LIST = []
     ENV = dict()

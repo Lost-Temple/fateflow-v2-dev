@@ -1,4 +1,4 @@
-party_id: "JG0100001100000000"
+party_id: "9999"
 use_registry: false
 # DEBUG 10/INFO 20
 log_level: 20
@@ -17,6 +17,7 @@ fateflow:
 #    http_port:
 #    grpc_port:
 database:
+#  engine: sqlite
   engine: mysql
   # encrypt passwd key
   decrypt_key:

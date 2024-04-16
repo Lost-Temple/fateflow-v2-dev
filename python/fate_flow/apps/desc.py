@@ -31,7 +31,7 @@ ORDER = "Sorting order: asc/desc"
 TASK_NAME = "Task name"
 TASK_ID = "Task ID"
 TASK_VERSION = "Task version"
-NODES = "Tags and customizable information for tasks"
+NODES = "Tags and customizable information for tasks"  # 这里应为NOTES,拼写错误
 
 # data
 SERVER_FILE_PATH = "File path on the server"
