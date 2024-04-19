@@ -37,7 +37,7 @@ from fate_flow.manager.pipeline import pipeline as pipeline_manager
 @API.Input.json(dag_schema=fields.Dict(required=True), desc=DAG_SCHEMA)
 @API.Input.headers(user_name=fields.String(required=False), desc=USER_NAME)
 def submit_job(dag_schema, user_name=None):
-    dag_schema = DAGSchema(**dag_schema)
+    dag_schema = DAGSchema(**dag_schema)  # DAGSchema对象kind属性默认为fate
     if dag_schema.kind == PROTOCOL.FATE_FLOW:
         submit_result = JobController.request_create_job(dag_schema, user_name)
     else:

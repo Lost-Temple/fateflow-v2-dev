@@ -80,7 +80,7 @@ def register_page(page_path, func=None, prefix=API_VERSION):
     page.manager.route = types.MethodType(route, page.manager)
 
     if func:
-        page.manager.before_request(func)
+        page.manager.before_request(func)  # 注册请求拦截器，func为拦截器函数
     sys.modules[module_name] = page
     spec.loader.exec_module(page)
     page_name = getattr(page, 'page_name', page_name)

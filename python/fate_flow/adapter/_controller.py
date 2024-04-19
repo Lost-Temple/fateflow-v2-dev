@@ -5,8 +5,8 @@ from fate_flow.entity.spec.flow import SubmitJobInput, SubmitJobOutput, QueryJob
 
 class AdapterJobController(object):
     def __init__(self, protocol_name):
-        packages = load_bridge_module(protocol_name=protocol_name)
-        self.controller_adapter = getattr(packages, "JobController")
+        packages = load_bridge_module(protocol_name=protocol_name)  # 根据protocol_name找到同名目录下的bridge目录，也就是模块
+        self.controller_adapter = getattr(packages, "JobController")  # 这里是目录adapter/xxx/bridge/job.py中的JobController
 
     def create_job(self, submit_job_input: SubmitJobInput) -> SubmitJobOutput:
         return self.controller_adapter.create_job(submit_job_input)

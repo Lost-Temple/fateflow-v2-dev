@@ -102,7 +102,7 @@ class APIClient(requests.Session):
             raise Exception(f'Route table is null')
         if not headers:
             headers = {}
-        headers.update(
+        headers.update(  # 这里设置一下header，符合bfia协议要求，但是和文档中描述的好像也不太一样啊
             BFIAHttpHeadersSpec(
                 x_auth_sign="",
                 x_node_id=self.node_id,

@@ -32,10 +32,10 @@ def component():
 
 @component.command()
 def entrypoint():
-    configs = load_config_from_env()
+    configs = load_config_from_env()  # 读取系统环境变量
     logger = logging.getLogger(__name__)
     logger.debug(f"task config: {configs}")
-    BfiaWraps(TaskRuntimeEnv(**configs)).run()
+    BfiaWraps(TaskRuntimeEnv(**configs)).run()  # 把读取到环境变量的值当作参数去构造BfiaWraps对象，然后调用它的run()
 
 
 def load_config_from_env():
