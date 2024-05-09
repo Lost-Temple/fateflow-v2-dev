@@ -75,7 +75,7 @@ class DAGScheduler(SchedulerABC):
         schedule_logger().info("start schedule waiting jobs")
         # order by create_time and priority
         jobs = ScheduleJobSaver.query_job(  # 对应 t_schedule_job 表
-            status=JobStatus.WAITING,  # 状态为WAITING
+            status=JobStatus.WAITING,  # 状态为WAITING, 注意状态为WAITING状态的为fateflow的job
             order_by=["priority", "create_time"],  # 按优先级和创建时间排序
             reverse=[True, False]  # 按优先级的倒序排列，也就是值越大，优先级越高；优先级一样的情况下按时间升序排列
         )
