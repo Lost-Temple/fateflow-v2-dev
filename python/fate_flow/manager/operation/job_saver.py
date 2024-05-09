@@ -125,9 +125,9 @@ class ScheduleJobSaver(BaseSaver):
     @classmethod
     def query_task(cls, only_latest=True, reverse=None, order_by=None, scheduler_status=False, **kwargs):
         if not scheduler_status:
-            obj = ScheduleTask
+            obj = ScheduleTask  # 这种代码真恶心, obj 对应数据库表 t_schedule_task
         else:
-            obj = ScheduleTaskStatus
+            obj = ScheduleTaskStatus  # 这种代码真恶心, obj 对应数据库表 t_schedule_task_status
         return cls._query_task(obj, only_latest=only_latest, reverse=reverse, order_by=order_by,
                                scheduler_status=scheduler_status, **kwargs)
 
@@ -163,8 +163,8 @@ class ScheduleJobSaver(BaseSaver):
     def get_latest_scheduler_tasks(cls, tasks):
         tasks_group = {}
         for task in tasks:
-            if task.f_task_id not in tasks_group:
-                tasks_group[task.f_task_id] = task
-            elif task.f_task_version > tasks_group[task.f_task_id].f_task_version:
+            if task.f_task_id not in tasks_group:  # tasks_group是一个以task_id为key，task为值的字典
+                tasks_group[task.f_task_id] = task  # 在字典中不存在，则添加
+            elif task.f_task_version > tasks_group[task.f_task_id].f_task_version:  # task_id 已经在字典中了，要判断一下版本号，用版本号较大的那个覆盖
                 tasks_group[task.f_task_id] = task
         return tasks_group

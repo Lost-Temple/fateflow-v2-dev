@@ -85,7 +85,7 @@ def request_stop_job(job_id=None):
 @manager.route('/rerun', methods=['POST'])
 @API.Input.json(job_id=fields.String(required=True), desc=JOB_ID)
 def request_rerun_job(job_id=None):
-    jobs = JobController.query_job(job_id=job_id)
+    jobs = JobController.query_job(job_id=job_id)  # 以jobid查找作业
     if not jobs:
         return API.Output.fate_flow_exception(NoFoundJob(job_id=job_id))
     rerun_result = JobController.request_rerun_job(job=jobs[0])

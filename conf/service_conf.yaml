@@ -60,7 +60,7 @@ federation:
     host: 127.0.0.1
     port: 9370
     # stream or queue
-    mode: stream
+    mode: queue
 #  pulsar:
 #    host: 192.168.0.5
 #    port: 6650

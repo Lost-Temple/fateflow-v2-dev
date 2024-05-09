@@ -53,7 +53,7 @@ def load_scheduler():
     for package in packages:
         members = inspect.getmembers(package)
         class_list = [member[1] for member in members if inspect.isclass(member[1])]
-        for _class in class_list:
+        for _class in class_list:  # [BfiaDetector, BfiaScheduler]
             if issubclass(_class, SchedulerABC):
                 # start scheduler
                 _class(interval=2 * 1000).start()

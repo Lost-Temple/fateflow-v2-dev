@@ -309,7 +309,7 @@ class TaskController(object):
         scheduler_party_id, sync_type = task.f_scheduler_party_id, task.f_sync_type
         update_status = JobSaver.update_task_status(task_info=task_info)
         if update_status and EndStatus.contains(task_info.get("party_status")):
-            ResourceManager.return_task_resource(**task_info)
+            ResourceManager.return_task_resource(**task_info)  # 归还资源
         if "party_status" in task_info:
             report_task_info = {
                 "job_id": task_info.get("job_id"),
@@ -319,7 +319,7 @@ class TaskController(object):
                 "task_version": task_info.get("task_version"),
                 "status": task_info.get("party_status")
             }
-            if sync_type == FederatedCommunicationType.CALLBACK:
+            if sync_type == FederatedCommunicationType.CALLBACK:  # 报告给调度方
                 cls.report_task_to_scheduler(task_info=report_task_info, scheduler_party_id=scheduler_party_id)
         if update_status and EndStatus.contains(task_info.get("party_status")):
             cls.callback_task_output(task)

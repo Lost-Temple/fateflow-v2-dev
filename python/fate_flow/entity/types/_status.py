@@ -43,7 +43,7 @@ class BaseStateTransitionRule(object):
     RULES = {}
 
     @classmethod
-    def if_pass(cls, src_status, dest_status):
+    def if_pass(cls, src_status, dest_status):  # 根据转化规则判断 src_status 能否转化为 dest_status
         if src_status not in cls.RULES:
             return False
         if dest_status not in cls.RULES[src_status]:

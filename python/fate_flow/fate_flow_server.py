@@ -65,7 +65,7 @@ def server_init():
     # init adapter
     try:
         from fate_flow.adapter import init_adapter
-        init_adapter()
+        init_adapter()  # 这里是初始化Bfia相关的一些东西，包括BfiaScheduler定时器
     except Exception as ex:
         stat_logger.exception(ex)
 

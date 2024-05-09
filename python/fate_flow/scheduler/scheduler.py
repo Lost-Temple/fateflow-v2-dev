@@ -74,10 +74,10 @@ class DAGScheduler(SchedulerABC):
         # waiting
         schedule_logger().info("start schedule waiting jobs")
         # order by create_time and priority
-        jobs = ScheduleJobSaver.query_job(
-            status=JobStatus.WAITING,
-            order_by=["priority", "create_time"],
-            reverse=[True, False]
+        jobs = ScheduleJobSaver.query_job(  # 对应 t_schedule_job 表
+            status=JobStatus.WAITING,  # 状态为WAITING
+            order_by=["priority", "create_time"],  # 按优先级和创建时间排序
+            reverse=[True, False]  # 按优先级的倒序排列，也就是值越大，优先级越高；优先级一样的情况下按时间升序排列
         )
         schedule_logger().info(f"have {len(jobs)} waiting jobs")
         if len(jobs):
@@ -103,7 +103,7 @@ class DAGScheduler(SchedulerABC):
                 schedule_logger(job.f_job_id).error("schedule job failed")
         schedule_logger().info("schedule running jobs finished")
 
-        # rerun
+        # rerun 的作业的标志就rerun_signal 为True
         schedule_logger().info("start schedule rerun jobs")
         jobs = ScheduleJobSaver.query_job(rerun_signal=True, order_by="create_time", reverse=False)
         schedule_logger().info(f"have {len(jobs)} rerun jobs")

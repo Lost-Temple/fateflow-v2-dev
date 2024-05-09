@@ -189,7 +189,7 @@ def check_task_is_timeout(task: Task):
     if not task.f_start_time:
         return False
     running_time = (now_time - task.f_start_time)/1000
-    if task.f_timeout and running_time > task.f_timeout:
+    if task.f_timeout and running_time > task.f_timeout:  # f_timeout 默认72小时
         schedule_logger(task.f_job_id).info(f'task {task.f_task_name} run time {running_time}s timeout')
         schedule_logger(task.f_job_id).error(f'task {task.f_task_name} timeout[{task.f_timeout}s]')
         return True

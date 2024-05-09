@@ -40,7 +40,7 @@ class Detector(Cron):
         self.detect_expired_session()
 
     @classmethod
-    def detect_running_task(cls):
+    def detect_running_task(cls):  # 主要检查正在执行的任务有没有超时，任务的版本有没有问题之类的
         detect_logger().info('start to detect running task..')
         count = 0
         try:
@@ -49,17 +49,17 @@ class Detector(Cron):
             stop_job_ids = set()
             for task in running_tasks:
                 # check timeout
-                if check_task_is_timeout(task):
-                    stop_job_ids.add(task.f_job_id)
+                if check_task_is_timeout(task):  # 检查任务是否超时，默认超时时间72小时
+                    stop_job_ids.add(task.f_job_id)  # 如果已经超时，就添加到 "停止队列" 中去
                     continue
-                if task.f_run_ip != RuntimeConfig.JOB_SERVER_HOST:
+                if task.f_run_ip != RuntimeConfig.JOB_SERVER_HOST:  # 未超时，要进行IP判断，flow集群场景，单个参与方多个flow
                     cls.detect_cluster_instance_status(task, stop_job_ids)
                     continue
                 count += 1
                 try:
                     process_exist = build_engine(task.f_provider_name).is_alive(task)
                     if not process_exist:
-                        # ds task
+                        # ds task， 这DEEPSPEED 你写个DS ？淦
                         if task.f_launcher_name == LauncherType.DEEPSPEED:
                             deepspeed_engine = build_engine(task.f_provider_name, task.f_launcher_name)
                             if deepspeed_engine.is_alive(task):
@@ -96,20 +96,20 @@ class Detector(Cron):
             detect_logger().info(f"finish detect {count} running task")
 
     @classmethod
-    def detect_end_task(cls):
+    def detect_end_task(cls):  # 主要检查已经结束的任务
         detect_logger().info('start to detect end status task..')
         count = 0
         try:
             tasks = JobSaver.query_task(
                 run_ip=RuntimeConfig.JOB_SERVER_HOST,
                 run_port=RuntimeConfig.HTTP_PORT,
-                status=set(EndStatus.status_list()),
+                status=set(EndStatus.status_list()),  # 状态为：CANCELED/TIMEOUT/FAILED/PASS/SUCCESS
                 kill_status=False
             )
             for task in tasks:
                 try:
                     if task.f_end_time and task.f_end_time - current_timestamp() < 5 * 60 * 1000:
-                        continue
+                        continue  # 任务执行时间未超过5分钟，先不做操作
                     detect_logger().info(f'start to stop task {task.f_role} {task.f_party_id} {task.f_task_id}'
                                          f' {task.f_task_version}')
                     kill_task_status = TaskController.stop_task(task=task, stop_status=TaskStatus.FAILED)
@@ -124,8 +124,8 @@ class Detector(Cron):
 
     @classmethod
     def detect_expired_session(cls):
-        ttl = SESSION_VALID_PERIOD
-        detect_logger().info(f'start detect expired session by ttl {ttl/1000} s')
+        ttl = SESSION_VALID_PERIOD  # session 有效期
+        detect_logger().info(f'start detect expired session by ttl {ttl / 1000} s')
         try:
             session_records = Session.query_sessions(create_time=[None, current_timestamp() - ttl])
             for session_record in session_records:
@@ -137,11 +137,11 @@ class Detector(Cron):
                 detect_logger().info(f'start destroy session {manager_session_id}')
                 try:
                     sess = Session(session_id=manager_session_id, options={"logger": detect_logger()})
-                    sess.destroy_all_sessions()
+                    sess.destroy_all_sessions()  # 销毁session
                 except Exception as e:
                     detect_logger().error(f'stop session {manager_session_id} error', e)
                 finally:
-                    try:
+                    try:  # 从session list中移除
                         RuntimeConfig.SESSION_LIST.remove(manager_session_id)
                     except:
                         pass
@@ -172,25 +172,25 @@ class Detector(Cron):
         try:
             latest_tasks = JobSaver.query_task(task_id=task.f_task_id, role=task.f_role, party_id=task.f_party_id)
 
-            if len(latest_tasks) != 1:
+            if len(latest_tasks) != 1:  # 还要做这个判断？查出来的任务竟然不唯一？不同版本号的？
                 detect_logger(job_id=task.f_job_id).error(
                     f'query latest tasks of {task.f_task_id} failed, '
                     f'have {len(latest_tasks)} tasks'
                 )
                 return
 
-            if task.f_task_version != latest_tasks[0].f_task_version:
+            if task.f_task_version != latest_tasks[0].f_task_version:  # 版本不一致
                 detect_logger(job_id=task.f_job_id).info(
                     f'{task.f_task_id} {task.f_task_version} is not the latest task, '
-                     'update task status to failed'
+                    'update task status to failed'
                 )
                 JobSaver.update_task_status({
                     'task_id': task.f_task_id,
                     'role': task.f_role,
                     'party_id': task.f_party_id,
                     'task_version': task.f_task_version,
-                    'status': JobStatus.FAILED,
-                    'party_status': JobStatus.FAILED,
+                    'status': JobStatus.FAILED,  # 直接更新JOB状态为FAILED了
+                    'party_status': JobStatus.FAILED,  # 直接更新JOB状态为FAILED了
                 })
                 return
 
@@ -199,8 +199,8 @@ class Detector(Cron):
 
             if f'{task.f_run_ip}:{task.f_run_port}' not in instance_list:
                 detect_logger(job_id=task.f_job_id).error(
-                     'detect cluster instance status failed, '
-                     'add task {task.f_task_id} {task.f_task_version} to stop list'
+                    'detect cluster instance status failed, '
+                    'add task {task.f_task_id} {task.f_task_version} to stop list'
                 )
                 stop_job_ids.add(task.f_job_id)
         except Exception as e:
@@ -235,19 +235,25 @@ class Detector(Cron):
         try:
             filter_status = EndStatus.status_list()
             filter_status.append(JobStatus.WAITING)
-            jobs = Job.select().where(Job.f_resource_in_use == True, current_timestamp() - Job.f_apply_resource_time > 10 * 60 * 1000, Job.f_status << filter_status)
+            jobs = Job.select().where(Job.f_resource_in_use == True,
+                                      current_timestamp() - Job.f_apply_resource_time > 10 * 60 * 1000,
+                                      Job.f_status << filter_status)  # peewee查询条件中的 << 相当于SQL中的 in
             stop_jobs = set()
             for job in jobs:
                 if job.f_status == JobStatus.WAITING:
                     stop_jobs.add(job)
                 else:
                     try:
-                        detect_logger(job_id=job.f_job_id).info(f"start to return job {job.f_job_id} on {job.f_role} {job.f_party_id} resource")
-                        flag = ResourceManager.return_job_resource(job_id=job.f_job_id, role=job.f_role, party_id=job.f_party_id)
+                        detect_logger(job_id=job.f_job_id).info(
+                            f"start to return job {job.f_job_id} on {job.f_role} {job.f_party_id} resource")
+                        flag = ResourceManager.return_job_resource(job_id=job.f_job_id, role=job.f_role,
+                                                                   party_id=job.f_party_id)
                         if flag:
-                            detect_logger(job_id=job.f_job_id).info(f"return job {job.f_job_id} on {job.f_role} {job.f_party_id} resource successfully")
+                            detect_logger(job_id=job.f_job_id).info(
+                                f"return job {job.f_job_id} on {job.f_role} {job.f_party_id} resource successfully")
                         else:
-                            detect_logger(job_id=job.f_job_id).info(f"return job {job.f_job_id} on {job.f_role} {job.f_party_id} resource failed")
+                            detect_logger(job_id=job.f_job_id).info(
+                                f"return job {job.f_job_id} on {job.f_role} {job.f_party_id} resource failed")
                     except Exception as e:
                         detect_logger(job_id=job.f_job_id).exception(e)
             cls.request_stop_jobs(jobs=stop_jobs, stop_msg="start timeout", stop_status=JobStatus.TIMEOUT)
@@ -262,5 +268,5 @@ class FederatedDetector(Detector):
         self.detect_running_job_federated()
 
     @classmethod
-    def detect_running_job_federated(cls):
+    def detect_running_job_federated(cls):  # 这个暂时没有实现任何东西
         pass

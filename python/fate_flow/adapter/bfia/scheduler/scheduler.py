@@ -17,7 +17,7 @@ class BfiaScheduler(SchedulerABC):
     def run_do(self):
         logger = schedule_logger(name="bfia_scheduler")
         logger.info("start schedule bfia job")
-        jobs = BfiaScheduleJobSaver.query_job(  # 查询 READY 状态的JOB
+        jobs = BfiaScheduleJobSaver.query_job(  # 查询 t_schedule_job 表 READY 状态的JOB
             status=JobStatus.READY,
             order_by=["priority", "create_time"],
             reverse=[True, False]
