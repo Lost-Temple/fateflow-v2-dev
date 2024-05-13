@@ -76,7 +76,7 @@ class BfiaJobController(object):
         schedule_logger(job_id).info(f"start create job {job_id}")
         schedule_logger(job_id).info(f"job dag schema: {dag}")
         dag_schema = DagSchemaSpec(**dag)
-        for role, node_id_list in dag_schema.dag.config.role.dict().items():
+        for role, node_id_list in dag_schema.dag.config.role.dict().items():  # 创建本地作业，如果是有兼多个角色，就创建多个
             if node_id_list and PARTY_ID in node_id_list:
                 cls.create_local_job(job_id, role, PARTY_ID, dag_schema)
         schedule_logger(job_id).info(f"create job {job_id} success")
@@ -84,7 +84,7 @@ class BfiaJobController(object):
     @classmethod
     def create_local_job(cls, job_id, role, node_id, dag_schema: DagSchemaSpec):
         schedule_logger(job_id).info(f"create job {job_id} role {role}")
-        job = Job()
+        job = Job()  # 对应 t_job 表
         job.f_flow_id = dag_schema.dag.flow_id
         job.f_protocol = dag_schema.kind
         job.f_job_id = job_id
@@ -95,7 +95,7 @@ class BfiaJobController(object):
         job.f_parties = cls.get_job_parties(dag_schema)
         job.f_initiator_party_id = dag_schema.dag.config.initiator.node_id
         job.f_scheduler_party_id = dag_schema.dag.config.initiator.node_id
-        job.f_status = JobStatus.READY
+        job.f_status = JobStatus.READY  # 状态为 READY
         job.f_model_id = job_id
         job.f_model_version = "0"
         JobSaver.create_job(job_info=job.to_human_model_dict())
@@ -107,9 +107,9 @@ class BfiaJobController(object):
             "job_id": job_id,
             "start_time": current_timestamp()
         }
-        cls.update_job_info(job_info=job_info, callback=cls.update_job)
-        job_info["status"] = JobStatus.RUNNING
-        cls.update_job_info(job_info=job_info, callback=cls.update_job_status)
+        cls.update_job_info(job_info=job_info, callback=cls.update_job)  # 更新job的信息（这里是job的启动时间）
+        job_info["status"] = JobStatus.RUNNING  # 状态为 RUNNING
+        cls.update_job_info(job_info=job_info, callback=cls.update_job_status)  # 更新job的状态（回调的是update_job_status）
         schedule_logger(job_id).info(f"start job on status {job_info.get('status')}")
 
     @classmethod
@@ -126,7 +126,7 @@ class BfiaJobController(object):
 
     @classmethod
     def update_job_status(cls, job_info):
-        update_status = JobSaver.update_job_status(job_info=job_info)
+        update_status = JobSaver.update_job_status(job_info=job_info)  # 对应的是t_job表
         if update_status and EndStatus.contains(job_info.get("status")):
             pass
 
@@ -178,11 +178,11 @@ class BfiaJobController(object):
 
         # update job status
         if update_job or cls.calculate_job_is_finished(job):
-            BfiaJobController.update_job_status({
+            BfiaJobController.update_job_status({  # 对应t_job
                 "job_id": job.f_job_id,
                 "role": job.f_role,
                 "party_id": job.f_party_id,
-                "status": JobStatus.FINISHED
+                "status": JobStatus.FINISHED   # 状态改为FINISHED
             })
 
     @classmethod
@@ -205,18 +205,18 @@ class BfiaJobController(object):
         return True
 
     @classmethod
-    def calculate_multi_party_job_status(cls, party_status):
+    def calculate_multi_party_job_status(cls, party_status):  # 计算多方JOB状态
         tmp_status_set = set(party_status)
         if len(tmp_status_set) == 1:
             return tmp_status_set.pop()
         else:
-            if JobStatus.REJECTED in tmp_status_set:
+            if JobStatus.REJECTED in tmp_status_set:  # 只要有一方状态为REJECT，那就返回REJECT
                 return JobStatus.REJECTED
-            if JobStatus.FINISHED in tmp_status_set:
+            if JobStatus.FINISHED in tmp_status_set:  # 只要有一方FINISHED，就返回FINISHED
                 return JobStatus.FINISHED
-            if JobStatus.RUNNING in tmp_status_set:
+            if JobStatus.RUNNING in tmp_status_set:  # 只要有一方为RUNNING，就返回RUNNING
                 return JobStatus.RUNNING
-            if JobStatus.READY in tmp_status_set:
+            if JobStatus.READY in tmp_status_set:  # 只要有一方为READY, 那就为READY
                 return JobStatus.READY
-            if JobStatus.PENDING in tmp_status_set:
+            if JobStatus.PENDING in tmp_status_set:  # 只要有一方为PENDING，那就为PENDING
                 return JobStatus.PENDING

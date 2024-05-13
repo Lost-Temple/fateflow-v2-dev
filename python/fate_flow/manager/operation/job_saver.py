@@ -25,11 +25,11 @@ from fate_flow.db.schedule_models import ScheduleJob, ScheduleTask, ScheduleTask
 class JobSaver(BaseSaver):
     @classmethod
     def create_job(cls, job_info) -> Job:
-        return cls._create_job(Job, job_info)
+        return cls._create_job(Job, job_info)  # fate 协议的是保存到 t_job 表，跟BFIA的在这里有所区别的
 
     @classmethod
     def create_task(cls, task_info) -> Task:
-        return cls._create_task(Task, task_info)
+        return cls._create_task(Task, task_info)  # 对应 t_task 表
 
     @classmethod
     def delete_job(cls, job_id):
@@ -71,9 +71,9 @@ class JobSaver(BaseSaver):
             cls, only_latest=True, reverse=None, order_by=None, ignore_protocol=False, protocol=PROTOCOL.FATE_FLOW,
             **kwargs
     ):
-        if not ignore_protocol:
+        if not ignore_protocol:  # 指定protocol 的情况,默认为fate
             kwargs["protocol"] = protocol
-        return cls._query_task(
+        return cls._query_task(  # 指定了protocol
             Task, only_latest=only_latest, reverse=reverse, order_by=order_by, **kwargs
         )
 
@@ -100,11 +100,11 @@ class JobSaver(BaseSaver):
 class ScheduleJobSaver(BaseSaver):
     @classmethod
     def create_job(cls, job_info) -> ScheduleJob:
-        return cls._create_job(ScheduleJob, job_info)
+        return cls._create_job(ScheduleJob, job_info)  # 这个对应到 t_schedule_job
 
     @classmethod
     def create_task(cls, task_info) -> ScheduleTask:
-        return cls._create_task(ScheduleTask, task_info)
+        return cls._create_task(ScheduleTask, task_info)  # 对应 t_schedule_task
 
     @classmethod
     def delete_job(cls, job_id):

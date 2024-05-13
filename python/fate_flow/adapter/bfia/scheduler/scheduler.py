@@ -96,7 +96,7 @@ class BfiaScheduler(SchedulerABC):
             job.f_scheduler_party_id = dag_schema.dag.config.initiator.node_id
             job.f_dag = dag_schema.dict()
             job.f_protocol = dag_schema.kind
-            job.f_status = StatusSet.READY
+            job.f_status = StatusSet.READY  # 注意，这里的JOB状态为 READY
             BfiaScheduleJobSaver.create_job(job.to_human_model_dict())
             body = dag_schema.dag.dict(exclude_unset=True)
             body.update({
