@@ -62,23 +62,23 @@ class BaseSaver(BaseModelOperate):
     def _update_job_status(cls, job_obj, job_info):
         schedule_logger(job_info["job_id"]).info("try to update job status to {}".format(job_info.get("status")))
         update_status = cls._update_status(job_obj, job_info)
-        if update_status:
+        if update_status:  # 状态更新成功
             schedule_logger(job_info["job_id"]).info("update job status successfully")
-            if cls.end_status_contains(job_info.get("status")):
+            if cls.end_status_contains(job_info.get("status")):  # 如果状态为终态
                 new_job_info = {}
                 # only update tag
                 for k in ["job_id", "role", "party_id", "tag"]:
                     if k in job_info:
                         new_job_info[k] = job_info[k]
-                if not new_job_info.get("tag"):
-                    new_job_info["tag"] = "job_end"
+                if not new_job_info.get("tag"):  # 没有指定 tag
+                    new_job_info["tag"] = "job_end"  # 则把 tag 更新为 job_end
                 cls.update_entity_table(job_obj, new_job_info)
         else:
             schedule_logger(job_info["job_id"]).warning("update job status does not take effect")
         return update_status
 
     @classmethod
-    def _update_job(cls, job_obj, job_info):
+    def _update_job(cls, job_obj, job_info):  # 更新除状态外的其它指定字段的值
         schedule_logger(job_info["job_id"]).info("try to update job")
         if "status" in job_info:
             # Avoid unintentional usage that updates the status

@@ -165,14 +165,14 @@ class DAGScheduler(SchedulerABC):
     @classmethod
     @wraps_utils.schedule_lock
     def schedule_waiting_jobs(cls, job: ScheduleJob):
-        if job.f_cancel_signal:
+        if job.f_cancel_signal:  # 如果取消标识为真，则向联邦发送同步作业状态的请求，使联邦参与方把作业状态改为取消状态
             FederatedScheduler.sync_job_status(job_id=job.f_job_id, roles=job.f_parties,
                                                job_info={"job_id": job.f_job_id, "status": JobStatus.CANCELED})
             ScheduleJobSaver.update_job_status({"job_id": job.f_job_id, "status": JobStatus.CANCELED})
             schedule_logger(job.f_job_id).info("job have cancel signal")
             return
-        status = cls.apply_job_resource(job)
-        if status:
+        status = cls.apply_job_resource(job)  # 申请计算资源
+        if status:  # 如果申请成功，则启动作业
             cls.start_job(job_id=job.f_job_id, roles=job.f_parties)
 
     @wraps_utils.schedule_lock
@@ -272,7 +272,7 @@ class DAGScheduler(SchedulerABC):
     @classmethod
     def start_job(cls, job_id, roles):
         schedule_logger(job_id).info(f"start job {job_id}")
-        status_code, response = FederatedScheduler.start_job(job_id, roles)
+        status_code, response = FederatedScheduler.start_job(job_id, roles)  # 让联邦中参与方发送 partner/job/start
         schedule_logger(job_id).info(f"start job {job_id} status code: {status_code}, response: {response}")
         ScheduleJobSaver.update_job_status(job_info={"job_id": job_id, "status": StatusSet.RUNNING})
 
@@ -424,7 +424,7 @@ class TaskScheduler(object):
         schedule_logger(job.f_job_id).info("scheduling job tasks")
         dag_schema = DAGSchema(**job.f_dag)
         job_parser = JobParser(DAGSchema(**job.f_dag))
-        tasks_group = ScheduleJobSaver.get_status_tasks_asc(job_id=job.f_job_id)
+        tasks_group = ScheduleJobSaver.get_status_tasks_asc(job_id=job.f_job_id)  # 从t_schedule_task_status中查询
         waiting_tasks = {}
         auto_rerun_tasks = []
         job_interrupt = False
@@ -438,18 +438,18 @@ class TaskScheduler(object):
                                                             task_version=task.f_task_version)
             task_interrupt = False
             task_status_have_update = False
-            if new_task_status != task.f_status:
+            if new_task_status != task.f_status:  # 从数据库t_scheduler_task中查询各方任务状态得出一个状态值和当前任务状态不一致
                 task_status_have_update = True
                 schedule_logger(job.f_job_id).info(f"sync task status {task.f_status} to {new_task_status}")
-                task.f_status = new_task_status
+                task.f_status = new_task_status  # 发请求给参与方把状态改为新的状态
                 FederatedScheduler.sync_task_status(task_id=task.f_task_id, command_body={"status": task.f_status})
                 ScheduleJobSaver.update_task_status(task.to_human_model_dict(), scheduler_status=True)
-            if InterruptStatus.contains(new_task_status):
+            if InterruptStatus.contains(new_task_status):  # 如果是 CANCELED,TIMEOUT,FAILED之一
                 task_interrupt = True
                 job_interrupt = True
-            if task.f_status == TaskStatus.WAITING:
+            if task.f_status == TaskStatus.WAITING:  # 如果为等待状态，那就把它放入到一个字典中
                 waiting_tasks[task.f_task_name] = task
-            elif task_status_have_update and EndStatus.contains(task.f_status) or task_interrupt:
+            elif task_status_have_update and EndStatus.contains(task.f_status) or task_interrupt:  # 结束任务
                 schedule_logger(task.f_job_id).info(f"stop task with status: {task.f_status}")
                 FederatedScheduler.stop_task(task_id=task.f_task_id, command_body={"status": task.f_status})
                 if not canceled and AutoRerunStatus.contains(task.f_status):
@@ -462,23 +462,23 @@ class TaskScheduler(object):
         scheduling_status_code = SchedulingStatusCode.NO_NEXT
         schedule_logger(job.f_job_id).info(f"canceled status {canceled}, job interrupt status {job_interrupt}")
         if not canceled and not job_interrupt:
-            for task_id, waiting_task in waiting_tasks.items():
-                dependent_tasks = job_parser.infer_dependent_tasks(
+            for task_id, waiting_task in waiting_tasks.items():  # 遍历等待任务
+                dependent_tasks = job_parser.infer_dependent_tasks(  # 获取依赖任务（前置任务）
                     dag_schema.dag.tasks[waiting_task.f_task_name].inputs
                 )
                 schedule_logger(job.f_job_id).info(f"task {waiting_task.f_task_name} dependent tasks:{dependent_tasks}")
-                for task_name in dependent_tasks:
+                for task_name in dependent_tasks:  # 遍历前置任务
                     dependent_task = tasks_group[task_name]
-                    if dependent_task.f_status != TaskStatus.SUCCESS:
-                        break
-                else:
+                    if dependent_task.f_status != TaskStatus.SUCCESS:  # 如果有前置任务状态不为成功，则结束遍历前置任务
+                        break  # 啥也不干，跳出内层循环
+                else:  # 没有前署任务
                     scheduling_status_code = SchedulingStatusCode.HAVE_NEXT
                     status_code = cls.start_task(job=job, task=waiting_task)  # 启动task
-                    if status_code == SchedulingStatusCode.NO_RESOURCE:
+                    if status_code == SchedulingStatusCode.NO_RESOURCE:  # 申请的计算资源不足
                         schedule_logger(job.f_job_id).info(
                             f"task {waiting_task.f_task_id} can not apply resource, wait for the next round of scheduling")
                         break
-                    elif status_code == SchedulingStatusCode.FAILED:
+                    elif status_code == SchedulingStatusCode.FAILED:  # 启动任务失败了
                         schedule_logger(job.f_job_id).info(f"task status code: {status_code}")
                         scheduling_status_code = SchedulingStatusCode.FAILED
                         waiting_task.f_status = StatusSet.FAILED
@@ -570,13 +570,13 @@ class TaskScheduler(object):
                     ScheduleJobSaver.update_task_status(task_info=tmp_task_info)
 
     @classmethod
-    def get_federated_task_status(cls, job_id, task_id, task_version):
+    def get_federated_task_status(cls, job_id, task_id, task_version):  # 从数据库表t_schedule_task 中获取各参与方任务状态
         tasks_on_all_party = ScheduleJobSaver.query_task(task_id=task_id, task_version=task_version)
         if not tasks_on_all_party:
             schedule_logger(job_id).error(f"task {task_id} {task_version} no found")
             return TaskStatus.FAILED
         tasks_party_status = [task.f_status for task in tasks_on_all_party]
-        status = cls.calculate_multi_party_task_status(tasks_party_status)
+        status = cls.calculate_multi_party_task_status(tasks_party_status)  # 综合各参与方的任务状态，计算出一个状态值
         schedule_logger(job_id=job_id).info(
             "task {} {} status is {}, calculate by task party status list: {}".format(task_id, task_version, status,
                                                                                       tasks_party_status))

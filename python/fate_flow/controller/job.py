@@ -134,8 +134,8 @@ class JobController(object):
 
     @classmethod
     def update_job_status(cls, job_info):
-        update_status = JobSaver.update_job_status(job_info=job_info)
-        if update_status and EndStatus.contains(job_info.get("status")):
+        update_status = JobSaver.update_job_status(job_info=job_info)  # 更新JOB状态，t_job表
+        if update_status and EndStatus.contains(job_info.get("status")):  #  如果更新成功并且状态为终态，则回收计算资源
             ResourceManager.return_job_resource(
                 job_id=job_info["job_id"], role=job_info["role"], party_id=job_info["party_id"])
         return update_status
