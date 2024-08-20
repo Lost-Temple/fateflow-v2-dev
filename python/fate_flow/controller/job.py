@@ -46,7 +46,7 @@ class JobController(object):
         cls.check_job_params(schema)
         response = FederatedScheduler.request_create_job(
             party_id=schema.dag.conf.scheduler_party_id,
-            initiator_party_id=schema.dag.conf.initiator_party_id,
+            initiator_party_id=schema.dag.conf.initiator_party_id,  # 这里会发往发起方的节点
             command_body=schema.dict()
         )
         if user_name and response.get("code") == ReturnCode.Base.SUCCESS:
@@ -98,8 +98,8 @@ class JobController(object):
         schedule_logger(job_id).info(f"party_job_parameters: {party_parameters}")
         schedule_logger(job_id).info(f"role {role} party_id {party_id} task run: {task_run}, task cores {task_cores}")
         job_info.update(party_parameters)
-        JobSaver.create_job(job_info=job_info)
-        # create task
+        JobSaver.create_job(job_info=job_info)  # t_job表中创建记录
+        # create task, 在本地t_schedule_task, t_task中创建记录
         TaskController.create_tasks(job_id, role, party_id, dag_schema, task_run=task_run, task_cores=task_cores)
 
     @classmethod
@@ -135,7 +135,7 @@ class JobController(object):
     @classmethod
     def update_job_status(cls, job_info):
         update_status = JobSaver.update_job_status(job_info=job_info)  # 更新JOB状态，t_job表
-        if update_status and EndStatus.contains(job_info.get("status")):  #  如果更新成功并且状态为终态，则回收计算资源
+        if update_status and EndStatus.contains(job_info.get("status")):  # 如果更新成功并且状态为终态，则回收计算资源
             ResourceManager.return_job_resource(
                 job_id=job_info["job_id"], role=job_info["role"], party_id=job_info["party_id"])
         return update_status

@@ -21,6 +21,6 @@ from fate_flow.runtime.job_default_config import JobDefaultConfig
 class ConfigManager:
     @classmethod
     def load(cls):
-        JobDefaultConfig.load()
-        ResourceManager.initialize()
+        JobDefaultConfig.load()  # job_default_config.yaml 中的配置
+        ResourceManager.initialize()  # 初始化引擎/注册引擎到数据库
         ServerRegistry.load()

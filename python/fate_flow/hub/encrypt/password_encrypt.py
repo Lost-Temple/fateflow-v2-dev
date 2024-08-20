@@ -5,7 +5,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5 as PKCS1_cipher
 
 
-def rsa_key_generate():
+def rsa_key_generate():  # 生成密钥对， RSA 密钥对生成
     random_generator = Random.new().read
     rsa = RSA.generate(2048, random_generator)
     private_pem = rsa.exportKey().decode()
@@ -17,13 +17,13 @@ def rsa_key_generate():
     return private_pem, public_pem
 
 
-def encrypt_data(public_key, msg):
+def encrypt_data(public_key, msg):  # 使用公钥对明文进行加密生成密文
     cipher = PKCS1_cipher.new(RSA.importKey(public_key))
     encrypt_text = base64.b64encode(cipher.encrypt(bytes(msg.encode("utf8"))))
     return encrypt_text.decode('utf-8')
 
 
-def pwdecrypt(private_key, encrypt_msg):
+def pwdecrypt(private_key, encrypt_msg):  # 使用私钥对密文进行解密返回明文
     try:
         cipher = PKCS1_cipher.new(RSA.importKey(private_key))
         back_text = cipher.decrypt(base64.b64decode(encrypt_msg), 0)

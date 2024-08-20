@@ -117,7 +117,7 @@ class APIClient(requests.Session):
             "source_host": self.host,
             "source_port": self.port,
         })
-        if is_local:
+        if is_local:  # 这里的is_local是对party_id是否为0的判断
             return self.remote_on_http(**kwargs)
         if self.remote_host and self.remote_port:
             kwargs.update({
@@ -198,7 +198,7 @@ class BaseAPI:
                           initiator_party_id=""):
         try:
             headers = {}
-            if self.callback:  # 这里回调
+            if self.callback:  # 这里回调, fate_flow/python/fate_flow/utils/api_utils.py 中的 generate_headers
                 result = self.callback(dest_party_id, body, initiator_party_id=initiator_party_id)
                 if result.code == 0:
                     headers = result.signature if result.signature else {}

@@ -19,7 +19,6 @@ from pydantic import typing
 from fate_flow.db.base_models import DB
 from fate_flow.db.db_models import EngineRegistry, Job, Task
 from fate_flow.entity.types import EngineType, ResourceOperation, LauncherType
-from fate_flow.runtime.job_default_config import JobDefaultConfig
 from fate_flow.runtime.system_settings import IGNORE_RESOURCE_ROLES, ENGINES
 from fate_flow.utils import engine_utils, base_utils, job_utils
 from fate_flow.utils.log import getLogger
@@ -30,7 +29,7 @@ stat_logger = getLogger()
 
 class ResourceManager(object):
     @classmethod
-    def initialize(cls):
+    def initialize(cls):  # computing/storage/federation engine
         engines_config = engine_utils.get_engines_config_from_conf(group_map=True)
         for engine_type, engine_configs in engines_config.items():
             for engine_name, engine_config in engine_configs.items():

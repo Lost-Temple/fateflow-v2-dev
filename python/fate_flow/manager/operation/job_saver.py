@@ -25,7 +25,7 @@ from fate_flow.db.schedule_models import ScheduleJob, ScheduleTask, ScheduleTask
 class JobSaver(BaseSaver):
     @classmethod
     def create_job(cls, job_info) -> Job:
-        return cls._create_job(Job, job_info)  # fate 协议的是保存到 t_job 表，跟BFIA的在这里有所区别的
+        return cls._create_job(Job, job_info)  # 对应 t_job表
 
     @classmethod
     def create_task(cls, task_info) -> Task:
@@ -72,8 +72,8 @@ class JobSaver(BaseSaver):
             **kwargs
     ):
         if not ignore_protocol:  # 指定protocol 的情况,默认为fate
-            kwargs["protocol"] = protocol
-        return cls._query_task(  # 指定了protocol
+            kwargs["protocol"] = protocol  # 查询条件中增加一项：协议,如 fate/bfia
+        return cls._query_task(  # 忽略protocol
             Task, only_latest=only_latest, reverse=reverse, order_by=order_by, **kwargs
         )
 
@@ -125,9 +125,9 @@ class ScheduleJobSaver(BaseSaver):
     @classmethod
     def query_task(cls, only_latest=True, reverse=None, order_by=None, scheduler_status=False, **kwargs):
         if not scheduler_status:
-            obj = ScheduleTask  # 这种代码真恶心, obj 对应数据库表 t_schedule_task
+            obj = ScheduleTask  # obj 对应数据库表 t_schedule_task
         else:
-            obj = ScheduleTaskStatus  # 这种代码真恶心, obj 对应数据库表 t_schedule_task_status
+            obj = ScheduleTaskStatus  # obj 对应数据库表 t_schedule_task_status
         return cls._query_task(obj, only_latest=only_latest, reverse=reverse, order_by=order_by,
                                scheduler_status=scheduler_status, **kwargs)
 

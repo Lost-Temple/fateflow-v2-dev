@@ -24,10 +24,10 @@ class FlowHub:
     @staticmethod
     def load_components_wraps(config, module_name=None):
         if not module_name:
-            module_name = DEFAULT_COMPONENTS_WRAPS_MODULE
-        class_name = module_name.split(".")[-1]
-        module = ".".join(module_name.split(".")[:-1])
-        return getattr(import_module(module), class_name)(config)
+            module_name = DEFAULT_COMPONENTS_WRAPS_MODULE  # 默认模块 "fate_flow.hub.components_wraps.fate.FlowWraps"
+        class_name = module_name.split(".")[-1]  # 去除掉包路径，剩余类名称
+        module = ".".join(module_name.split(".")[:-1])  # 根据“."切片，切片把最后的类名丢掉，剩余包路径的切片，再把切片用“.”连接起来得到原来的包路径
+        return getattr(import_module(module), class_name)(config)  # 这里就是实例化 FlowWraps/
 
     @staticmethod
     def load_provider_entrypoint(provider: ComponentProvider):

@@ -34,7 +34,7 @@ from fate_flow.utils.log import getLogger
 from fate_flow.utils.log_utils import schedule_logger, audit_logger
 from fate_flow.utils.requests_utils import request
 
-parser.unknown = marshmallow.EXCLUDE
+parser.unknown = marshmallow.EXCLUDE  # parser在解析数据时，对未定义的字段不做处理，直接忽略掉。
 
 stat_logger = getLogger()
 
@@ -82,7 +82,8 @@ class API:
 
         @staticmethod
         def file(path_or_file, attachment_filename, as_attachment, mimetype="application/octet-stream"):
-            return send_file(path_or_file, download_name=attachment_filename, as_attachment=as_attachment, mimetype=mimetype)
+            return send_file(path_or_file, download_name=attachment_filename, as_attachment=as_attachment,
+                             mimetype=mimetype)
 
         @staticmethod
         def server_error_response(e):
@@ -119,7 +120,9 @@ class API:
                         else:
                             message = f"Request uri {flask_request.base_url} failed: {str(e)}"
                             return API.Output.json(code=code, message=message)
+
                 return _wrapper
+
             return _outer
 
 
@@ -127,7 +130,7 @@ def get_federated_proxy_address():
     # protocol = CoordinationCommunicationProtocol.HTTP
     proxy_name = PROXY_NAME
     if ENGINES.get("federated_mode") == FederatedMode.SINGLE:
-        return HOST, HTTP_PORT, CoordinationCommunicationProtocol.HTTP, PROXY_NAME
+        return HOST, HTTP_PORT, CoordinationCommunicationProtocol.HTTP, PROXY_NAME  # 返回的变量前2可以看到是远程地址和端口就是用的本机的地址和端口
     if proxy_name == CoordinationProxyService.OSX:
         host = PROXY.get(proxy_name).get("host")
         port = PROXY.get(proxy_name).get("port")

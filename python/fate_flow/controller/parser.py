@@ -269,16 +269,16 @@ class TaskParser(object):
         }
         engine_name = ENGINES.get(EngineType.FEDERATION).lower()
         proxy_conf = copy.deepcopy(PROXY.get(engine_name, {}))
-        if engine_name == FederationEngine.STANDALONE:
+        if engine_name == FederationEngine.STANDALONE:  # 如果是 standalone， 单机方式
             spec = StandaloneFederationSpec(type=engine_name, metadata=StandaloneFederationSpec.MetadataSpec(
                 federation_id=self.federation_id, parties=parties))
-        elif engine_name == FederationEngine.ROLLSITE:
+        elif engine_name == FederationEngine.ROLLSITE:  # rollsite, fate v1 时的方式
             spec = RollSiteFederationSpec(type=engine_name, metadata=RollSiteFederationSpec.MetadataSpec(
                 federation_id=self.federation_id,
                 parties=parties,
                 rollsite_config=RollSiteFederationSpec.MetadataSpec.RollSiteConfig(**proxy_conf)
             ))
-        elif engine_name == FederationEngine.OSX:
+        elif engine_name == FederationEngine.OSX:  # fate bfia 版方式
             mode = proxy_conf.pop("mode", OSXMode.QUEUE)
             if mode == OSXMode.QUEUE:
                 spec = OSXFederationSpec(type=engine_name, metadata=OSXFederationSpec.MetadataSpec(
@@ -293,7 +293,7 @@ class TaskParser(object):
                         federation_id=self.federation_id,
                         parties=parties,
                         rollsite_config=RollSiteFederationSpec.MetadataSpec.RollSiteConfig(**proxy_conf)
-                ))
+                    ))
             else:
                 raise RuntimeError(f"federation engine {engine_name} mode {mode}is not supported")
         elif engine_name == FederationEngine.PULSAR:
@@ -523,7 +523,8 @@ class DagParser(object):
                             inputs = [RuntimeTaskOutputChannelSpec(**channel.dict(exclude_defaults=True))
                                       for channel in filter_channel_spec_list]
                         else:
-                            inputs = RuntimeTaskOutputChannelSpec(**filter_channel_spec_list[0].dict(exclude_defaults=True))
+                            inputs = RuntimeTaskOutputChannelSpec(
+                                **filter_channel_spec_list[0].dict(exclude_defaults=True))
 
                         if not inputs:
                             continue
@@ -703,7 +704,8 @@ class DagParser(object):
         return self._dag[role][party_id].edges[src, dst]
 
     @classmethod
-    def task_can_run(cls, role, party_id, component_spec: ComponentSpec=None, runtime_parties: List[PartySpec]=None):
+    def task_can_run(cls, role, party_id, component_spec: ComponentSpec = None,
+                     runtime_parties: List[PartySpec] = None):
         if component_spec and role not in component_spec.roles:
             return False
 

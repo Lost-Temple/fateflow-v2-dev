@@ -24,4 +24,4 @@ if __name__ == "__main__":
 
     cli = click.Group()
     cli.add_command(component)
-    cli(prog_name="python -m fate_flow.components")
+    cli(prog_name="python -m fate_flow.components")  # 这里会调用到 fate_flow/python/fate_flow/components/entrypoint/cli.py 里面的entrypoint

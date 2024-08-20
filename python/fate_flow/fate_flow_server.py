@@ -34,7 +34,6 @@ from fate_flow.manager.service.service_manager import service_db
 from fate_flow.runtime.runtime_config import RuntimeConfig
 from fate_flow.db.base_models import init_database_tables as init_flow_db
 from fate_flow.scheduler.detector import Detector, FederatedDetector
-from fate_flow.entity.types import ProcessRole
 from fate_flow.scheduler import init_scheduler
 from fate_flow.runtime.system_settings import (
     GRPC_PORT, GRPC_SERVER_MAX_WORKERS, HOST, HTTP_PORT , GRPC_OPTIONS, FATE_FLOW_LOG_DIR,
@@ -85,7 +84,7 @@ def server_init():
     AppManager.init()
 
     # scheduler
-    init_scheduler()
+    init_scheduler()  # 这个初始化，实例化 FlowSchedulerApi 对象
 
     # detector
     Detector(interval=5 * 1000, logger=detect_logger).start()
@@ -93,7 +92,7 @@ def server_init():
     DAGScheduler(interval=2 * 1000, logger=schedule_logger()).start()
 
     # provider register
-    ProviderManager.register_default_providers()
+    ProviderManager.register_default_providers()  # 注册默认的算法组件提供商，并注册组件到数据库中
 
 
 def start_server(debug=False):

@@ -68,7 +68,7 @@ def get_engines():
             ]
 
     # set default federated mode by federation engine
-    if engines[EngineType.FEDERATION] == FederationEngine.STANDALONE:
+    if engines[EngineType.FEDERATION] == FederationEngine.STANDALONE:  # 如果配置文件中配置的federation 是 standalone模式
         engines["federated_mode"] = FederatedMode.SINGLE
     else:
         engines["federated_mode"] = FederatedMode.MULTIPLE

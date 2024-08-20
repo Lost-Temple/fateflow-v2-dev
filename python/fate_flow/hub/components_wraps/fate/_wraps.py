@@ -641,7 +641,7 @@ class FlowWraps(WrapsABC):
     def load_mlmd(mlmd):
         if mlmd.type == "flow":
             from ofx.api.client import FlowSchedulerApi
-            client = FlowSchedulerApi(
+            client = FlowSchedulerApi(  # 实例化FlowSchedulerApi
                 host=mlmd.metadata.get("host"),
                 port=mlmd.metadata.get("port"),
                 protocol=mlmd.metadata.get("protocol"),
