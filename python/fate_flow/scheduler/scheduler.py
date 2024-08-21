@@ -358,7 +358,7 @@ class DAGScheduler(SchedulerABC):
             "data": {}
         }
         try:
-            job = ScheduleJob()
+            job = ScheduleJob()  # t_schedule_job 表
             job.f_job_id = job_id
             job.f_parties = [party.dict() for party in dag_schema.dag.parties]
             job.f_initiator_party_id = dag_schema.dag.conf.initiator_party_id
@@ -377,7 +377,7 @@ class DAGScheduler(SchedulerABC):
             body.update({
                 "job_id": job_id
             })
-            status_code, response = FederatedScheduler.create_job(
+            status_code, response = FederatedScheduler.create_job(  # 往联邦节点的partner_app.py 发送
                 job_id, job.f_parties, job.f_initiator_party_id, body
             )
             if status_code != FederatedSchedulingStatusCode.SUCCESS:

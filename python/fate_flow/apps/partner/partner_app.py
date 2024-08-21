@@ -39,7 +39,7 @@ page_name = 'partner'
 @create_job_request_check
 def partner_create_job(dag, schema_version, job_id, role, party_id):
     try:
-        JobController.create_job(dag, schema_version, job_id, role, party_id)
+        JobController.create_job(dag, schema_version, job_id, role, party_id)  # t_job, t_schedule_task, t_task
         return API.Output.json()
     except Exception as e:
         stat_logger.exception(e)

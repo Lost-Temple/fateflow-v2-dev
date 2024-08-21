@@ -66,7 +66,7 @@ class TaskController(object):
             parties=job_parser.get_task_runtime_parties(task_name),
             model_id=dag_schema.dag.conf.model_id, model_version=dag_schema.dag.conf.model_version
         )
-        if is_scheduler:
+        if is_scheduler:  # 如果是调度方，会在t_scheduler_task表中创建
             task = ScheduleTask()
             task.f_job_id = job_id
             task.f_role = role
@@ -78,7 +78,7 @@ class TaskController(object):
             task.f_status = TaskStatus.WAITING
             task.f_parties = [party.dict() for party in dag_schema.dag.parties]
             ScheduleJobSaver.create_task(task.to_human_model_dict())
-        else:
+        else:  # 在 t_task 表中创建
             task_parameters = task_parser.task_parameters
             if task_parser.engine_run:
                 task_run.update(task_parser.engine_run)

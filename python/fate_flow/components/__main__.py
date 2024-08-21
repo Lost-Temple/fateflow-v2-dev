@@ -19,9 +19,10 @@ execute with python -m fate.components --config xxx
 """
 
 if __name__ == "__main__":
-    import click
-    from fate_flow.components.entrypoint.cli import component
+    import click  # click 是一个命令行工具，可以很方便的实现命令行工具的开发。
+    from fate_flow.components.entrypoint.cli import component  # component 是一个命令组
 
-    cli = click.Group()
+    cli = click.Group()  # Group 是 click 中的一个容器，可以包含多个子命令。
     cli.add_command(component)
-    cli(prog_name="python -m fate_flow.components")  # 这里会调用到 fate_flow/python/fate_flow/components/entrypoint/cli.py 里面的entrypoint
+    # 这里会调用到 fate_flow/python/fate_flow/components/entrypoint/cli.py 里面的定义的子命令：entrypoint/cleanup/execute
+    cli(prog_name="python -m fate_flow.components")

@@ -32,7 +32,7 @@ def component():
     """
 
 
-@component.command()
+@component.command()  # 把命令添加到group中
 @click.option("--config", required=False, type=click.File(), help="config path")
 @click.option("--env-name", required=True, type=str, help="env name for config", default="CONFIG")
 @click.option("--wraps-module", required=False, type=str, help="component run wraps module")
@@ -49,7 +49,7 @@ def entrypoint(config, env_name, wraps_module):
     FlowHub.load_components_wraps(config=task_config, module_name=wraps_module).run()
 
 
-@component.command()
+@component.command()  # 把命令添加到group中
 @click.option("--config", required=False, type=click.File(), help="config path")
 @click.option("--env-name", required=False, type=str, help="env name for config")
 @click.option("--wraps-module", required=False, type=str, help="component run wraps module")
@@ -65,7 +65,7 @@ def cleanup(config, env_name, wraps_module=None):
     FlowHub.load_components_wraps(config=task_config, module_name=wraps_module).cleanup()
 
 
-@component.command()
+@component.command()  # 把命令添加到group中
 @click.option("--config", required=False, type=click.File(), help="config path")
 @click.option("--env-name", required=False, type=str, help="env name for config")
 @click.option(
