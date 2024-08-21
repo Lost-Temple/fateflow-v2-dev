@@ -67,8 +67,8 @@ class LocalEngine(EngineABC):
         module_file_path = sys.modules[FateFlowSubmit.__module__].__file__
         common_cmd = [
             module_file_path,
-            "component",
-            "entrypoint",
+            "component",  # 命令组的名称
+            "entrypoint",  # 命令的名称
             "--env-name",
             "FATE_TASK_CONFIG",
         ]

@@ -41,13 +41,13 @@ def run_subprocess(
     os.makedirs(std_dir, exist_ok=True)
     if not std_dir:
         std_dir = config_dir
-    std_path = get_std_path(std_dir=std_dir, process_name=process_name)
+    std_path = get_std_path(std_dir=std_dir, process_name=process_name)  # process_name实际就是worker_name.value
 
     std = open(std_path, 'w')
     if not stderr:
         stderr = std
     pid_path = os.path.join(config_dir, "pid", f"{process_name}")
-    os.makedirs(os.path.dirname(pid_path), exist_ok=True)
+    os.makedirs(os.path.dirname(pid_path), exist_ok=True)  # 举例：'/Users/mao/work/python/opensource/github.com/FATE/FederateAI/FATE/fate_flow/jobs/202408211045148669470/guest/9999/reader_0/0/pid/task_entrypoint'
 
     if os.name == 'nt':
         startupinfo = subprocess.STARTUPINFO()
@@ -66,11 +66,11 @@ def run_subprocess(
                 value += ':' + subprocess_env[name]
             subprocess_env[name] = value
     logger.info(f"RUN ENV：{json.dumps(subprocess_env)}")
-    p = subprocess.Popen(process_cmd,
+    p = subprocess.Popen(process_cmd,  # 是个列表，里面包含python 执行环境的路径；worker 的代码路径；命令组名称；命令行参数；
                          stdout=std,
                          stderr=stderr,
                          startupinfo=startupinfo,
-                         cwd=cwd_dir,
+                         cwd=cwd_dir,  # 举例：'/Users/mao/work/python/opensource/github.com/FATE/FederateAI/FATE/fate_flow/jobs/202408211045148669470/guest/9999/reader_0/0'
                          env=subprocess_env
                          )
     with open(pid_path, 'w') as f:

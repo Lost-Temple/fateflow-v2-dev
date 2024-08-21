@@ -24,7 +24,7 @@ class FateFlowSubmit:
     @staticmethod
     def run():
         import runpy
-        runpy.run_module(mod_name='fate_flow.components', run_name='__main__')
+        runpy.run_module(mod_name='fate_flow.components', run_name='__main__')  # 这个会调用fate_flow.components下的__main__
 
 
 if __name__ == "__main__":

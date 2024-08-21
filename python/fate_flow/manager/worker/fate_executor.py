@@ -19,7 +19,7 @@ class FateSubmit:
     @staticmethod
     def run():
         import runpy
-        runpy.run_module(mod_name='fate.components', run_name='__main__')
+        runpy.run_module(mod_name='fate.components', run_name='__main__')  # 这里就会调用到 fate.components 下的 __main__
 
 
 if __name__ == "__main__":
