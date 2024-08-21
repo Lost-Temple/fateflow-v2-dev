@@ -48,7 +48,7 @@ app.errorhandler(Exception)(API.Output.server_error_response)
 app.json_provider_class = CustomJSONEncoder
 
 
-def search_pages_path(pages_dir):
+def search_pages_path(pages_dir):  # app 文件命名还需要以_app.py结尾才可以
     return [path for path in pages_dir.glob('*_app.py') if not path.name.startswith('.')]
 
 
@@ -59,7 +59,7 @@ def get_app_module(page_path):
 
 
 def register_page(page_path, func=None, prefix=API_VERSION):
-    page_name = page_path.stem.rstrip('app').rstrip("_")
+    page_name = page_path.stem.rstrip('app').rstrip("_")  # 这里是从文件名去掉后面的 _app.py 留下来的
     fate_flow_index = len(page_path.parts) - 1 - page_path.parts[::-1].index("fate_flow")
     module_name = '.'.join(page_path.parts[fate_flow_index:-1] + (page_name, ))
     spec = spec_from_file_location(module_name, page_path)
@@ -83,9 +83,9 @@ def register_page(page_path, func=None, prefix=API_VERSION):
         page.manager.before_request(func)  # 注册请求拦截器，func为拦截器函数
     sys.modules[module_name] = page
     spec.loader.exec_module(page)
-    page_name = getattr(page, 'page_name', page_name)
+    page_name = getattr(page, 'page_name', page_name)  # 这里是取得*_app.py文件中定义的page_name变量的值
     url_prefix = f'/{prefix}/{page_name}'
-    app.register_blueprint(page.manager, url_prefix=url_prefix)
+    app.register_blueprint(page.manager, url_prefix=url_prefix)  # 注册蓝图
     return page_name, [(os.path.join(url_prefix, rule_methods[0].lstrip("/")), rule_methods[1]) for rule_methods in rule_methods_list]
 
 
