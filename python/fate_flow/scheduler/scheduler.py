@@ -431,14 +431,15 @@ class TaskScheduler(object):
         canceled = job.f_cancel_signal
         for task in tasks_group.values():
             if task.f_sync_type == FederatedCommunicationType.POLL:
-                cls.collect_task_of_all_party(job=job, task=task)
+                cls.collect_task_of_all_party(job=job, task=task)  # 从联邦的t_task表获取状态，更新到t_schedule_task表中
             else:
                 pass
             new_task_status = cls.get_federated_task_status(job_id=task.f_job_id, task_id=task.f_task_id,
                                                             task_version=task.f_task_version)
             task_interrupt = False
             task_status_have_update = False
-            if new_task_status != task.f_status:  # 从数据库t_scheduler_task中查询各方任务状态得出一个状态值和当前任务状态不一致
+            # new_task_status 是从t_schedule_task表中查的，当前任务是从t_schedule_task_status中查询的
+            if new_task_status != task.f_status:
                 task_status_have_update = True
                 schedule_logger(job.f_job_id).info(f"sync task status {task.f_status} to {new_task_status}")
                 task.f_status = new_task_status  # 发请求给参与方把状态改为新的状态
@@ -549,7 +550,7 @@ class TaskScheduler(object):
         # tasks_status_on_all = set([task.f_status for task in tasks_on_all_party])
         # if not len(tasks_status_on_all) > 1 and TaskStatus.RUNNING not in tasks_status_on_all:
         #     return
-        status, federated_response = FederatedScheduler.collect_task(task_id=task.f_task_id)
+        status, federated_response = FederatedScheduler.collect_task(task_id=task.f_task_id)  # 向联邦发送任务状态查询，最终是从t_task表查询
         if status != FederatedSchedulingStatusCode.SUCCESS:
             schedule_logger(job.f_job_id).warning(f"collect task {task.f_task_id} {task.f_task_version} failed")
         for _role in federated_response.keys():
@@ -557,7 +558,7 @@ class TaskScheduler(object):
                 if party_response["code"] == ReturnCode.Base.SUCCESS:
                     schedule_logger(job.f_job_id).info(
                         f"collect party id {_party_id} task info: {party_response['data']}")
-                    ScheduleJobSaver.update_task_status(task_info=party_response["data"])
+                    ScheduleJobSaver.update_task_status(task_info=party_response["data"])  # 更新的是t_schedule_task
                 elif set_status:
                     tmp_task_info = {
                         "job_id": task.f_job_id,
@@ -565,9 +566,9 @@ class TaskScheduler(object):
                         "task_version": task.f_task_version,
                         "role": _role,
                         "party_id": _party_id,
-                        "party_status": set_status
+                        "party_status": set_status  # 如果查询失败，就直接用指定的状态更新一下
                     }
-                    ScheduleJobSaver.update_task_status(task_info=tmp_task_info)
+                    ScheduleJobSaver.update_task_status(task_info=tmp_task_info)  # 更新t_schedule_task中的状态值
 
     @classmethod
     def get_federated_task_status(cls, job_id, task_id, task_version):  # 从数据库表t_schedule_task 中获取各参与方任务状态

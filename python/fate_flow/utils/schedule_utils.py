@@ -39,13 +39,13 @@ def rerun_signal(job_id, set_or_reset: bool):
 
 @DB.connection_context()
 def schedule_signal(job_id: object, set_or_reset: bool) -> bool:
-    filters = [ScheduleJob.f_job_id == job_id]
+    filters = [ScheduleJob.f_job_id == job_id]  # ORM代码中，== 运算符被重载，用于构建 SQL 查询条件，返回的是一个表达式对象，而不是布尔值。
     if set_or_reset:
         update_fields = {ScheduleJob.f_schedule_signal: True, ScheduleJob.f_schedule_time: current_timestamp()}
-        filters.append(ScheduleJob.f_schedule_signal == False)
+        filters.append(ScheduleJob.f_schedule_signal == False)  # 当这个信号量为False时才会更新成True
     else:
         update_fields = {ScheduleJob.f_schedule_signal: False, ScheduleJob.f_schedule_time: None}
-        filters.append(ScheduleJob.f_schedule_signal == True)
+        filters.append(ScheduleJob.f_schedule_signal == True)  # 当这个信号量为True时才会更新成False
     update_status = ScheduleJob.update(update_fields).where(*filters).execute() > 0
     if set_or_reset and not update_status:
         # update timeout signal
