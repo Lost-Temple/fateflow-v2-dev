@@ -254,11 +254,11 @@ class TaskController(object):
         parties = job_parser.get_task_runtime_parties(task_name=task.f_task_name)
         for party in parties:
             for party_id in party.party_id:
-                cls.create_task(
+                cls.create_task(  # is_scheduler=True， 代表在t_schedule_task表中创建一条新版任务（指定了task_name）
                     job.f_job_id, party.role, party_id, task.f_task_name, dag_schema, job_parser,
                     is_scheduler=True, task_version=new_version
                 )
-        TaskController.create_scheduler_tasks_status(
+        TaskController.create_scheduler_tasks_status(  # 在t_schedule_task_status表中创建一条新版任务(指定了task_name)
             job.f_job_id,
             dag_schema,
             task_version=new_version,
@@ -276,7 +276,7 @@ class TaskController(object):
             auto = False
             schedule_logger(job_id).info(
                 f"task {task.f_task_id} {task.f_task_version} with {task.f_status} was forced to rerun")
-        elif task.f_status in {TaskStatus.SUCCESS}:
+        elif task.f_status in {TaskStatus.SUCCESS}:  # 状态为成功的是不创建新版本的，会忽略掉
             schedule_logger(job_id).info(
                 f"task {task.f_task_id} {task.f_task_version} is {task.f_status} and not force reruen, pass rerun")
         elif auto and task.f_auto_retries < 1:

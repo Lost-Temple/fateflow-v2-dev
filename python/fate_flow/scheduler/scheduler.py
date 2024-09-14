@@ -431,14 +431,17 @@ class TaskScheduler(object):
         canceled = job.f_cancel_signal
         for task in tasks_group.values():
             if task.f_sync_type == FederatedCommunicationType.POLL:
-                cls.collect_task_of_all_party(job=job, task=task)  # 从联邦的t_task表获取状态，更新到t_schedule_task表中
+                # 从联邦的t_task表获取状态，更新到t_schedule_task表中，注意这里task是新版本的task，不然会从联邦获取一个旧版本的task
+                # 的状态，那就是直接是失败的状态，那就直接结束了
+                cls.collect_task_of_all_party(job=job, task=task)
             else:
                 pass
+            # 从数据库表t_schedule_task 中获取各参与方任务状态，综合计算后得到一个状态值返回
             new_task_status = cls.get_federated_task_status(job_id=task.f_job_id, task_id=task.f_task_id,
                                                             task_version=task.f_task_version)
             task_interrupt = False
             task_status_have_update = False
-            # new_task_status 是从t_schedule_task表中查的，当前任务是从t_schedule_task_status中查询的
+            # new_task_status 是从t_schedule_task表中各方状态的一个综合值，当前任务是从t_schedule_task_status中查询的
             if new_task_status != task.f_status:
                 task_status_have_update = True
                 schedule_logger(job.f_job_id).info(f"sync task status {task.f_status} to {new_task_status}")
@@ -464,7 +467,7 @@ class TaskScheduler(object):
         schedule_logger(job.f_job_id).info(f"canceled status {canceled}, job interrupt status {job_interrupt}")
         if not canceled and not job_interrupt:
             for task_id, waiting_task in waiting_tasks.items():  # 遍历等待任务
-                dependent_tasks = job_parser.infer_dependent_tasks(  # 获取依赖任务（前置任务）
+                dependent_tasks = job_parser.infer_dependent_tasks(  # 传入当前任务的inputs，获取它的依赖任务（前置任务）
                     dag_schema.dag.tasks[waiting_task.f_task_name].inputs
                 )
                 schedule_logger(job.f_job_id).info(f"task {waiting_task.f_task_name} dependent tasks:{dependent_tasks}")
@@ -472,7 +475,7 @@ class TaskScheduler(object):
                     dependent_task = tasks_group[task_name]
                     if dependent_task.f_status != TaskStatus.SUCCESS:  # 如果有前置任务状态不为成功，则结束遍历前置任务
                         break  # 啥也不干，跳出内层循环
-                else:  # 没有前署任务
+                else:  # 没有前置任务
                     scheduling_status_code = SchedulingStatusCode.HAVE_NEXT
                     status_code = cls.start_task(job=job, task=waiting_task)  # 启动task
                     if status_code == SchedulingStatusCode.NO_RESOURCE:  # 申请的计算资源不足
