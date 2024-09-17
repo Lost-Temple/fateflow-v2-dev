@@ -71,7 +71,7 @@ def load_adapter_apps(register_page, search_pages_path):
     urls_dict = {}
     for name in adapter_list:
         path = Path(__file__).parent / name / "apps"
-        version = getattr(import_module(get_app_module(path)), "__version__", None)
+        version = getattr(import_module(get_app_module(path)), "__version__", None)  # 这里的版本是v1
         before_request_func = getattr(import_module(get_app_module(path)), "before_request", None)
         urls_dict[name] = [register_page(path, func=before_request_func, prefix=version) for path in
                            search_pages_path(path)]

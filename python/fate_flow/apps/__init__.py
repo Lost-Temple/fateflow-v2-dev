@@ -123,7 +123,7 @@ def init_apps():
     # adapter extend apps
     try:
         from fate_flow.adapter import load_adapter_apps
-        urls_dict.update(load_adapter_apps(register_page, search_pages_path))
+        urls_dict.update(load_adapter_apps(register_page, search_pages_path))  # 这里会注册app的蓝图
     except:
         pass
     if CLIENT_AUTHENTICATION or SITE_AUTHENTICATION:  # 如果开启了鉴权
